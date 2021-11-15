@@ -9,7 +9,6 @@ import { ReactDatez } from 'react-datez';
 import moment from 'moment';
 
 
-
 const initialFormData = {
     restaurantIds: [],
     fromDate: "",
@@ -31,6 +30,7 @@ const newCriteriaData = {
     operatorType: "And"
 };
 
+
 function App() {
 
     const [restaurantIds, setRestaurantIds] = useState([]);
@@ -46,6 +46,10 @@ function App() {
     const [activePage, setActivePage] = useState(1);
     const [metricCriteria, setMetricCriteria] = useState([newCriteriaData]); // holds the data for metrics comparisons
     
+    // PAGINATION
+    const numItems = 20; // number of items per page. Overflow goes to next page
+    const paginatedResults = resultsData.slice((activePage-1)*numItems, activePage*numItems);
+
 
     useEffect(() => {
         getMetrics().then(data => {setMetrics(data);
@@ -74,23 +78,14 @@ function App() {
         }
     }
 
-    // PAGINATION
-    const numItems = 20; // number of items per page. Overflow goes to next page
-    const paginatedResults = resultsData.slice((activePage-1)*numItems, activePage*numItems);
-
-
     // ADD CRITERIA
     function addCriteria() {
         // append a new empty criterion to the current metric criteria, updates metric criteria variable
-        console.log(metricCriteria)
         const updatedCriteria = [];
-        console.log(updatedCriteria);
         for (var i=0; i<metricCriteria.length; i++){
             updatedCriteria[i] = {...metricCriteria[i]};
         }
-        console.log(updatedCriteria);
         updatedCriteria.push(newCriteriaData);
-        //console.log(metricCriteria);
         setMetricCriteria(updatedCriteria);
     }
 
@@ -115,11 +110,8 @@ function App() {
         } else {
             updatedCriteria[index][propertyName] = data.value;
         }
-        console.log(index);
-        console.log(updatedCriteria);
         setMetricCriteria(updatedCriteria);
     }
-
 
     function onSubmit() {
         const formData = {
@@ -129,12 +121,6 @@ function App() {
             fromHour: fromHour,
             toHour: toHour,
             metricCriteria: metricCriteria
-            /*metricCriteria: [{
-                metricCode: metricCode,
-                compareType: comparator,
-                value: Number(compareValue),
-                operatorType: "And"
-            }]*/
         };
         
         console.log(formData);
@@ -160,9 +146,9 @@ function App() {
             setActivePage(1)
         });
     }
-    // to add criteria
-    // <Button onClick={() => addCriteria()} color="violet">Add Criteria</Button>
-    console.log(metricCriteria);
+    
+    //console.log(metricCriteria);
+
     return (
         <div className="App">
             <Grid>
@@ -235,7 +221,6 @@ function App() {
                                                 </Form.Field>
                                             </Form.Group>
                                             
-                                            
                                             {metricCriteria.map((x, index) => {
                                                 return (
                                                     <Form.Group key={index}>
@@ -271,6 +256,15 @@ function App() {
                                                             placeholder={"Enter numerical value, e.g. 3"}
                                                             value={metricCriteria[index].value}
                                                             onChange={(event, data) => changeMetricCriteria("value", data, index)}
+                                                        />
+                                                        <Form.Field
+                                                            control={Select}
+                                                            label={'Operator'}
+                                                            options={operatorTypeOptions}
+                                                            placeholder={'Select Operator'}
+                                                            value={metricCriteria[index].operatorType}
+                                                            onChange={(event, data) => changeMetricCriteria("operatorType", data, index)}
+                                                            disabled={index === 0 ? true : false}
                                                         />
                                                     </Form.Group>
                                                 );
@@ -325,7 +319,6 @@ function App() {
                                     </Grid.Column>
                                 </Grid.Row>
                             </Grid>
-
                             
                             <Table>
                                 <Table.Header>
@@ -395,44 +388,4 @@ function App() {
 }
 
 export default App;
-
-
-
-
-/* old metric criterion menu
-                                            
-                                            <Form.Field>
-                                                <label style={{fontWeight: "bold"}}>Metrics</label>
-                                                <Dropdown
-                                                    control = {Select}
-                                                    options={metricOptions}
-                                                    placeholder={"Select Metrics"}
-                                                    selection
-                                                    value={metricCode}
-                                                    onChange={(event, data) => setMetricCode(data.value)}
-                                                />
-
-                                            </Form.Field>
-                                            <Form.Group>
-                                                <Form.Field>
-                                                <label style={{fontWeight: "bold"}}>Comparator</label>
-                                                <Dropdown
-                                                    options={measureOptions}
-                                                    placeholder={"Select Comparator"}
-                                                    selection
-                                                    onChange={(event, data) => setComparator(data.value)}
-                                                    value={comparator}
-                                                />
-                                                </Form.Field>
-                                                <Form.Field>
-                                                <label style={{fontWeight: "bold"}}>Compare Value</label>
-                                                    <Input
-                                                    text
-                                                    value={compareValue}
-                                                    onChange={(event, data) => setCompareValue(data.value)}
-                                                    />
-                                                </Form.Field>
-                                            </Form.Group>
-
-*/
 
